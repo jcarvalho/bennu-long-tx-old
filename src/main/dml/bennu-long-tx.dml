@@ -1,0 +1,6 @@
+relation UserHasOngoingTransactions {
+    .pt.ist.bennu.core.domain.User playsRole user;
+    .pt.ist.fenixframework.longtx.TransactionalContext playsRole ongoingTransactions {
+        multiplicity *;
+    }
+}

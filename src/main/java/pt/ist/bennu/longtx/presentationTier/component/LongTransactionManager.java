@@ -5,6 +5,7 @@ import java.util.Map;
 import module.vaadin.ui.BennuTheme;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.longtx.domain.LongTransactionUtils;
+import pt.ist.bennu.longtx.presentationTier.filter.LongTxFilter;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.longtx.TransactionalContext;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
@@ -14,6 +15,7 @@ import pt.ist.vaadinframework.ui.TransactionalTable;
 
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.ThemeResource;
+import com.vaadin.terminal.gwt.server.WebApplicationContext;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -40,7 +42,7 @@ public class LongTransactionManager extends CustomComponent implements EmbeddedC
     private final DomainContainer<TransactionalContext> container;
 
     public LongTransactionManager() {
-        container = new DomainContainer<>(Authenticate.getCurrentUser().getOngoingTransactions(), TransactionalContext.class);
+        container = new DomainContainer<>(Authenticate.getCurrentUser().getOngoingTransactionsSet(), TransactionalContext.class);
         container.setContainerProperties(new String[] { "name" });
     }
 
@@ -135,6 +137,8 @@ public class LongTransactionManager extends CustomComponent implements EmbeddedC
                     @Override
                     public void buttonClick(final ClickEvent event) {
                         getWindow().showNotification("Activating '" + context + "'");
+                        WebApplicationContext ctx = (WebApplicationContext) getWindow().getApplication().getContext();
+                        ctx.getHttpSession().setAttribute(LongTxFilter.LONG_TX_CONTEXT_KEY, context);
                     }
 
                 });
@@ -207,6 +211,7 @@ public class LongTransactionManager extends CustomComponent implements EmbeddedC
                     @Override
                     public void buttonClick(final ClickEvent event) {
                         source.getContainerDataSource().removeItem(itemId);
+                        context.setUser(null);
                         context.delete();
                     }
 
